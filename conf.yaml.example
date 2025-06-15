@@ -1,0 +1,61 @@
+# Mora + DeerFlow Configuration File
+# This file provides an alternative way to configure the system
+# Priority: .env variables > conf.yaml > defaults
+
+# Enable tool calling for agents
+USE_TOOL_CALLING: true
+
+# Basic model configuration
+BASIC_MODEL:
+  base_url: "https://api.groq.com/openai/v1"
+  model: "meta-llama/llama-4-scout-17b-16e-instruct"
+  api_key: $GROQ_API_KEY  # Reference to environment variable
+
+# Search configuration
+SEARCH_API: tavily
+TAVILY_API_KEY: $TAVILY_API_KEY
+
+# Optional RAG provider
+RAG_PROVIDER: ragflow
+RAGFLOW_API_URL: "http://localhost:9388"
+RAGFLOW_API_KEY: $RAGFLOW_API_KEY
+RAGFLOW_RETRIEVAL_SIZE: 10
+
+# Optional TTS configuration
+VOLCENGINE_TTS:
+  APPID: $VOLCENGINE_TTS_APPID
+  ACCESS_TOKEN: $VOLCENGINE_TTS_ACCESS_TOKEN
+  CLUSTER: "volcano_tts"
+  VOICE_TYPE: "BV700_V2_streaming"
+
+# Optional monitoring
+LANGSMITH:
+  TRACING: false
+  ENDPOINT: "https://api.smith.langchain.com"
+  API_KEY: $LANGSMITH_API_KEY
+  PROJECT: $LANGSMITH_PROJECT
+
+# Performance settings
+PERFORMANCE:
+  BATCH_SIZE_CHAT: 3
+  BATCH_SIZE_QUIZ: 5
+  BATCH_SIZE_AGENT: 4
+  BATCH_TIMEOUT: 2000
+  CONCURRENCY_LIMIT: 3
+  RATE_LIMIT_RPM: 30
+
+# Cache settings
+CACHE:
+  TTL_EMBEDDINGS: 3600000  # 1 hour
+  TTL_SEARCH: 900000       # 15 minutes
+  TTL_CHAT: 600000         # 10 minutes
+  TTL_BKT: 300000          # 5 minutes
+  MAX_SIZE: 1000
+
+# Logging settings
+LOGGING:
+  LEVEL: "info"
+  ENABLE_CONSOLE: true
+  FILE_PATH: "logs/app.log"
+  MAX_SIZE: "10m"
+  MAX_FILES: 5

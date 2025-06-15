@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mora + DeerFlow - Sistema Adaptativo</title>
+    <!-- KaTeX CSS - versión actualizada -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <!-- KaTeX JS - con defer para carga ordenada -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --primary-dark: #7C3AED;
+            --primary-light: #A78BFA;
+            --secondary: #6366F1;
+            --accent: #EC4899;
+            --bg-primary: #0F0F23;
+            --bg-secondary: #1A1A2E;
+            --bg-tertiary: #16213E;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #64748B;
+            --border: #334155;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            flex-shrink: 0;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6, #a855f7, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        <div class="study-mode-toggle">
+            <label class="toggle-label">Modo:</label>
+            <div class="toggle-switch">
+                <input type="radio" id="theory-mode" name="study-mode" value="theory" checked>
+                <label for="theory-mode" class="toggle-option">📚 Teoría</label>
+                <input type="radio" id="practice-mode" name="study-mode" value="practice">
+                <label for="practice-mode" class="toggle-option">🎯 Práctica</label>
+            </div>
+        </div>
+
+        .clear-chat-btn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #ef4444;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .clear-chat-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            transform: translateY(-1px);
+        }
+
+        .clear-chat-btn:active {
+            transform: translateY(0);
+        }
+
+        .study-mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-label {
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            display: flex;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 2px;
+        }
+
+        .toggle-switch input[type="radio"] {
+            display: none;
+        }
+
+        .toggle-option {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .toggle-switch input[type="radio"]:checked + .toggle-option {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        .toggle-option:hover {
+            color: #e2e8f0;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 8px;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .mode-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(139, 92, 246, 0.2);
+            color: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding: 15px 0 0 0;
+        }
+
+        /* Chat Mode - Full height like ChatGPT */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            position: relative;
+            min-height: 0;
+            height: calc(100vh - 120px); /* Almost full height */
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px 30px;
+            padding-bottom: 140px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+            min-height: 0;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.7);
+        }
+
+        .chat-input-container {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 25px 30px;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            margin-top: auto;
+        }
+
+        .message {
+            animation: fadeInUp 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 85%;
+            padding: 20px 24px;
+            border-radius: 18px;
+            line-height: 1.7;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 16px; /* Larger text */
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message.assistant .message-content {
+            background: rgba(51, 65, 85, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-bottom-left-radius: 6px;
+        }
+
+        /* LaTeX styling mejorado */
+        .message-content .katex {
+            font-size: 1.1em;
+            color: #e2e8f0 !important;
+        }
+
+        .message-content .katex-display {
+            margin: 16px 0;
+            text-align: center;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .message-content .katex-display > .katex {
+            display: inline-block;
+            white-space: nowrap;
+            color: #f8fafc !important;
+        }
+
+        .message-info {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chunks-info {
+            background: rgba(139, 92, 246, 0.1);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(51, 65, 85, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
+            padding: 18px 22px;
+            color: #e2e8f0;
+            font-size: 16px;
+            resize: none;
+            min-height: 60px;
+            max-height: 140px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .chat-input::placeholder {
+            color: #64748b;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border: none;
+            border-radius: 14px;
+            padding: 18px 24px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 90px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Quiz Mode */
+        .quiz-container {
+            display: none;
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-header h2 {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .quiz-input {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #e2e8f0;
+            font-size: 15px;
+            min-width: 180px;
+        }
+
+        .quiz-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .quiz-btn {
+            background: linear-gradient(135deg, #8b5cf6, #a855f7);
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .quiz-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .quiz-result {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 25px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 15px;
+        }
+
+        /* Plan Mode */
+        .plan-container {
+            display: none;
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .plan-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .plan-header h2 {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .plan-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .form-input {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #e2e8f0;
+            font-size: 15px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .plan-result {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 25px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 15px;
+        }
+
+        /* Agents Mode */
+        .agents-container {
+            display: none;
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .agents-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .agents-header h2 {
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .agent-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .agent-card {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-2px);
+            border-color: #8b5cf6;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+        }
+
+        .agent-card.active {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .agent-icon {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .agent-title {
+            color: #e2e8f0;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .agent-description {
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .agents-result {
+            background: rgba(51, 65, 85, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 25px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 15px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b5cf6;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            animation: loadingDot 1.4s infinite ease-in-out;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes loadingDot {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 60px 30px;
+            color: #94a3b8;
+        }
+
+        .welcome-message h2 {
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .welcome-message p {
+            margin-bottom: 12px;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .header-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .clear-chat-btn {
+                order: 2;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+                padding: 10px 0;
+            }
+
+            .mode-selector {
+                justify-content: center;
+            }
+
+            .mode-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 8px 12px;
+            }
+
+            .message-content {
+                max-width: 95%;
+                padding: 16px 20px;
+                font-size: 15px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .send-btn, .quiz-btn {
+                width: 100%;
+            }
+
+            .quiz-controls, .plan-form {
+                grid-template-columns: 1fr;
+            }
+
+            .agent-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-container {
+                height: calc(100vh - 140px);
+            }
+
+            .chat-messages {
+                padding: 20px;
+                padding-bottom: 120px;
+            }
+
+            .chat-input-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-controls">
+                <div class="logo">🧠 Mora + DeerFlow</div>
+                <div class="study-mode-toggle">
+                    <label class="toggle-label">Modo:</label>
+                    <div class="toggle-switch">
+                        <input type="radio" id="theory-mode" name="study-mode" value="theory" checked>
+                        <label for="theory-mode" class="toggle-option">📚 Teoría</label>
+                        <input type="radio" id="practice-mode" name="study-mode" value="practice">
+                        <label for="practice-mode" class="toggle-option">🎯 Práctica</label>
+                    </div>
+                </div>
+                <button id="clear-chat-btn" class="clear-chat-btn" title="Limpiar chat (Ctrl+Q)">
+                    🗑️
+                </button>
+            </div>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="chat">
+                    💬 Chat
+                </button>
+                <button class="mode-btn" data-mode="quiz">
+                    🎯 Quiz
+                </button>
+                <button class="mode-btn" data-mode="plan">
+                    📚 Plan
+                </button>
+                <button class="mode-btn" data-mode="agents">
+                    🤖 Agentes
+                </button>
+            </div>
+
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="status-text">Conectando...</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Chat Mode -->
+            <div class="chat-container" id="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome-message">
+                        <h2>¡Hola! 👋</h2>
+                        <p>Soy tu asistente de aprendizaje inteligente.</p>
+                        <p>Puedo ayudarte con preguntas sobre tus materiales de estudio.</p>
+                        <p><strong>Prueba preguntando:</strong> "¿Qué es machine learning?" o "Explícame Python"</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="chat-input" 
+                            class="chat-input" 
+                            placeholder="Escribe tu pregunta aquí... (Enter para enviar, Shift+Enter para nueva línea)"
+                            rows="1"
+                        ></textarea>
+                        <button id="send-btn" class="send-btn">
+                            <span id="send-text">Enviar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Mode -->
+            <div class="quiz-container" id="quiz-container">
+                <div class="quiz-header">
+                    <h2>🎯 Generador de Quiz Adaptativo</h2>
+                    <p>Crea quizzes personalizados basados en tu nivel y progreso</p>
+                </div>
+
+                <div class="quiz-controls">
+                    <input type="text" id="quiz-topic" class="quiz-input" placeholder="Tema (ej: derivadas, funciones)">
+                    <input type="number" id="quiz-questions" class="quiz-input" placeholder="Preguntas" value="3" min="1" max="10">
+                    <input type="text" id="quiz-student-id" class="quiz-input" placeholder="Tu ID (opcional)" value="estudiante1">
+                    <button id="generate-quiz-btn" class="quiz-btn">Generar Quiz</button>
+                </div>
+
+                <div id="quiz-result" class="quiz-result hidden"></div>
+            </div>
+
+            <!-- Plan Mode -->
+            <div class="plan-container" id="plan-container">
+                <div class="plan-header">
+                    <h2>📚 Planificador de Estudio Personalizado</h2>
+                    <p>Crea un plan de estudio adaptado a tu progreso y objetivos</p>
+                </div>
+
+                <div class="plan-form">
+                    <div class="form-group">
+                        <label class="form-label">Objetivo de estudio</label>
+                        <input type="text" id="plan-goal" class="form-input" placeholder="ej: Dominar cálculo diferencial">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Duración (días)</label>
+                        <input type="number" id="plan-duration" class="form-input" value="7" min="1" max="30">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tiempo diario (minutos)</label>
+                        <input type="number" id="plan-daily-time" class="form-input" value="30" min="15" max="180">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tu ID de estudiante</label>
+                        <input type="text" id="plan-student-id" class="form-input" placeholder="estudiante1" value="estudiante1">
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button id="generate-plan-btn" class="quiz-btn">Crear Plan Personalizado</button>
+                </div>
+
+                <div id="plan-result" class="plan-result hidden"></div>
+            </div>
+
+            <!-- Agents Mode -->
+            <div class="agents-container" id="agents-container">
+                <div class="agents-header">
+                    <h2>🤖 Agentes de Análisis Académico</h2>
+                    <p>Obtén análisis detallados de tu progreso y recomendaciones personalizadas</p>
+                </div>
+
+                <div class="agent-cards">
+                    <div class="agent-card" data-analysis="progreso">
+                        <div class="agent-icon">📊</div>
+                        <div class="agent-title">Análisis de Progreso</div>
+                        <div class="agent-description">Evalúa tu avance académico y identifica áreas de mejora</div>
+                    </div>
+                    <div class="agent-card" data-analysis="fortalezas">
+                        <div class="agent-icon">💪</div>
+                        <div class="agent-title">Fortalezas y Debilidades</div>
+                        <div class="agent-description">Identifica tus puntos fuertes y oportunidades de crecimiento</div>
+                    </div>
+                    <div class="agent-card" data-analysis="recomendaciones">
+                        <div class="agent-icon">🎯</div>
+                        <div class="agent-title">Recomendaciones</div>
+                        <div class="agent-description">Obtén sugerencias específicas para optimizar tu aprendizaje</div>
+                    </div>
+                    <div class="agent-card" data-analysis="estrategias">
+                        <div class="agent-icon">🧠</div>
+                        <div class="agent-title">Estrategias de Estudio</div>
+                        <div class="agent-description">Descubre métodos personalizados para mejorar tu rendimiento</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <input type="text" id="agents-student-id" class="quiz-input" placeholder="Tu ID de estudiante" value="estudiante1" style="margin-right: 10px;">
+                    <button id="run-analysis-btn" class="quiz-btn">Ejecutar Análisis</button>
+                </div>
+
+                <div id="agents-result" class="agents-result hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de inicialización KaTeX mejorado -->
+    <script>
+      // Configuración global de KaTeX
+      window.katexConfig = {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\[', right: '\\]', display: true},
+          {left: '\$$', right: '\$$', display: false}
+        ],
+        throwOnError: false,
+        errorColor: '#cc0000',
+        strict: false,
+        trust: true,
+        fleqn: false,
+        leqno: false
+      };
+
+      // Función mejorada de renderizado
+      function renderMathInElement_Enhanced(element, options = {}) {
+        const config = { ...window.katexConfig, ...options };
+        
+        if (typeof renderMathInElement === 'function') {
+          try {
+            renderMathInElement(element, config);
+            console.log('KaTeX rendered successfully');
+            return true;
+          } catch (error) {
+            console.error('KaTeX rendering error:', error);
+            return false;
+          }
+        }
+        return false;
+      }
+
+      // Inicialización cuando el DOM esté listo
+      document.addEventListener('DOMContentLoaded', function() {
+        function initializeKaTeX() {
+          if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
+            console.log('KaTeX loaded successfully');
+            
+            // Renderizar todo el contenido existente
+            renderMathInElement_Enhanced(document.body);
+            
+            // Marcar KaTeX como listo
+            window.katexReady = true;
+            
+            // Inicializar la aplicación
+            if (typeof AdaptiveApp !== 'undefined') {
+              new AdaptiveApp();
+            }
+          } else {
+            console.log('Waiting for KaTeX to load...');
+            setTimeout(initializeKaTeX, 100);
+          }
+        }
+        
+        initializeKaTeX();
+      });
+    </script>
+
+    <script>
+        class AdaptiveApp {
+            constructor() {
+                this.currentMode = 'chat';
+                this.isLoading = false;
+                this.selectedAnalysis = 'progreso';
+                this.initializeElements();
+                this.attachEventListeners();
+                this.checkAPIStatus();
+            }
+
+            initializeElements() {
+                // Chat elements
+                this.chatMessages = document.getElementById('chat-messages');
+                this.chatInput = document.getElementById('chat-input');
+                this.sendBtn = document.getElementById('send-btn');
+                this.sendText = document.getElementById('send-text');
+                
+                // Quiz elements
+                this.quizTopic = document.getElementById('quiz-topic');
+                this.quizQuestions = document.getElementById('quiz-questions');
+                this.quizStudentId = document.getElementById('quiz-student-id');
+                this.generateQuizBtn = document.getElementById('generate-quiz-btn');
+                this.quizResult = document.getElementById('quiz-result');
+                
+                // Plan elements
+                this.planGoal = document.getElementById('plan-goal');
+                this.planDuration = document.getElementById('plan-duration');
+                this.planDailyTime = document.getElementById('plan-daily-time');
+                this.planStudentId = document.getElementById('plan-student-id');
+                this.generatePlanBtn = document.getElementById('generate-plan-btn');
+                this.planResult = document.getElementById('plan-result');
+                
+                // Agents elements
+                this.agentsStudentId = document.getElementById('agents-student-id');
+                this.runAnalysisBtn = document.getElementById('run-analysis-btn');
+                this.agentsResult = document.getElementById('agents-result');
+                this.agentCards = document.querySelectorAll('.agent-card');
+
+                // Clear chat button
+                this.clearChatBtn = document.getElementById('clear-chat-btn');
+
+                // Study mode elements
+                this.theoryModeRadio = document.getElementById('theory-mode');
+                this.practiceModeRadio = document.getElementById('practice-mode');
+                this.currentStudyMode = 'theory';
+                this.vectorTemas = this.loadVectorTemas();
+                this.ejeActivo = null;
+                
+                // Common elements
+                this.statusText = document.getElementById('status-text');
+                this.modeButtons = document.querySelectorAll('.mode-btn');
+                this.containers = {
+                    chat: document.getElementById('chat-container'),
+                    quiz: document.getElementById('quiz-container'),
+                    plan: document.getElementById('plan-container'),
+                    agents: document.getElementById('agents-container')
+                };
+            }
+
+            attachEventListeners() {
+                // Mode switching
+                this.modeButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const mode = btn.dataset.mode;
+                        this.switchMode(mode);
+                    });
+                });
+
+                // Chat functionality
+                this.sendBtn.addEventListener('click', () => this.sendChatMessage());
+                this.chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendChatMessage();
+                    }
+                });
+                this.chatInput.addEventListener('input', () => {
+                    this.chatInput.style.height = 'auto';
+                    this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 140) + 'px';
+                });
+
+                // Quiz functionality
+                this.generateQuizBtn.addEventListener('click', () => this.generateQuiz());
+
+                // Plan functionality
+                this.generatePlanBtn.addEventListener('click', () => this.generatePlan());
+
+                // Agents functionality
+                this.agentCards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        this.agentCards.forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+                        this.selectedAnalysis = card.dataset.analysis;
+                    });
+                });
+                this.runAnalysisBtn.addEventListener('click', () => this.runAnalysis());
+
+                // Clear chat functionality
+                this.clearChatBtn.addEventListener('click', () => this.clearChat());
+
+                // Keyboard shortcut Ctrl+Q
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'q') {
+                        e.preventDefault();
+                        this.clearChat();
+                    }
+                });
+
+                // Study mode functionality
+                this.theoryModeRadio.addEventListener('change', () => {
+                    if (this.theoryModeRadio.checked) {
+                        this.currentStudyMode = 'theory';
+                        this.addChatMessage('📚 Modo cambiado a: Teoría', 'assistant');
+                    }
+                });
+
+                this.practiceModeRadio.addEventListener('change', () => {
+                    if (this.practiceModeRadio.checked) {
+                        this.currentStudyMode = 'practice';
+                        this.addChatMessage('🎯 Modo cambiado a: Práctica', 'assistant');
+                    }
+                });
+            }
+
+            clearChat() {
+                // Mostrar confirmación
+                const confirmed = confirm('¿Estás seguro de que quieres limpiar todo el chat? Esta acción no se puede deshacer.');
+                
+                if (confirmed) {
+                    // Limpiar todos los mensajes
+                    this.chatMessages.innerHTML = '';
+                    
+                    // Restaurar mensaje de bienvenida
+                    const welcomeDiv = document.createElement('div');
+                    welcomeDiv.className = 'welcome-message';
+                    welcomeDiv.innerHTML = `
+                        <h2>¡Hola! 👋</h2>
+                        <p>Soy tu asistente de aprendizaje inteligente.</p>
+                        <p>Puedo ayudarte con preguntas sobre tus materiales de estudio.</p>
+                        <p><strong>Prueba preguntando:</strong> "¿Qué es machine learning?" o "Explícame Python"</p>
+                    `;
+                    
+                    this.chatMessages.appendChild(welcomeDiv);
+                    
+                    // Mostrar mensaje de confirmación temporal
+                    setTimeout(() => {
+                        this.addChatMessage('✅ Chat limpiado correctamente. ¡Empecemos de nuevo!', 'assistant');
+                    }, 500);
+                    
+                    // Scroll to top
+                    this.chatMessages.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    
+                    console.log('Chat cleared successfully');
+                }
+            }
+
+            async runAnalysis() {
+                const studentId = this.agentsStudentId.value.trim() || 'estudiante1';
+                
+                const analysisMessages = {
+                    progreso: 'Analiza mi progreso académico general',
+                    fortalezas: 'Identifica mis fortalezas y debilidades',
+                    recomendaciones: 'Dame recomendaciones personalizadas',
+                    estrategias: 'Sugiere estrategias de estudio específicas'
+                };
+
+                this.setAgentsLoading(true);
+
+                try {
+                    const response = await fetch('/api/agents', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            message: analysisMessages[this.selectedAnalysis],
+                            studentId
+                        }),
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    this.agentsResult.innerHTML = data.response;
+                    
+                    // Renderizar matemáticas en el resultado de agentes
+                    setTimeout(() => {
+                        renderMathInElement_Enhanced(this.agentsResult);
+                    }, 100);
+                    
+                    this.agentsResult.classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.agentsResult.textContent = `❌ Error: ${error.message}`;
+                    this.agentsResult.classList.remove('hidden');
+                } finally {
+                    this.setAgentsLoading(false);
+                }
+            }
+
+            addChatMessage(content, sender, chunksUsed = 0, source = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.innerHTML = content;
+                
+                messageDiv.appendChild(contentDiv);
+
+                if (sender === 'assistant' && (chunksUsed > 0 || source)) {
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'message-info';
+                    
+                    if (chunksUsed > 0) {
+                        const chunksSpan = document.createElement('span');
+                        chunksSpan.className = 'chunks-info';
+                        chunksSpan.textContent = `📚 ${chunksUsed} fuente${chunksUsed > 1 ? 's' : ''}`;
+                        infoDiv.appendChild(chunksSpan);
+                    }
+                    
+                    if (source) {
+                        const sourceSpan = document.createElement('span');
+                        sourceSpan.textContent = `⚡ ${source}`;
+                        infoDiv.appendChild(sourceSpan);
+                    }
+                    
+                    messageDiv.appendChild(infoDiv);
+                }
+
+                const welcomeMsg = this.chatMessages.querySelector('.welcome-message');
+                if (welcomeMsg) {
+                    welcomeMsg.remove();
+                }
+
+                this.chatMessages.appendChild(messageDiv);
+                
+                // Renderizar LaTeX con KaTeX mejorado
+                setTimeout(() => {
+                    renderMathInElement_Enhanced(contentDiv);
+                }, 100);
+
+                // Different scrolling behavior for user vs assistant messages
+                if (sender === 'user') {
+                    // For user messages, scroll to bottom
+                    requestAnimationFrame(() => {
+                        this.chatMessages.scrollTo({
+                            top: this.chatMessages.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    });
+                } else {
+                    // For assistant messages, use the smart scrolling
+                    setTimeout(() => {
+                        this.scrollToNewestMessage();
+                    }, 100); // Small delay to ensure content is rendered
+                }
+            }
+
+            scrollToNewestMessage() {
+                requestAnimationFrame(() => {
+                    // Get the last message element
+                    const messages = this.chatMessages.querySelectorAll('.message');
+                    const lastMessage = messages[messages.length - 1];
+                    
+                    if (lastMessage) {
+                        // Get container and message dimensions
+                        const containerHeight = this.chatMessages.clientHeight;
+                        const containerScrollHeight = this.chatMessages.scrollHeight;
+                        const messageTop = lastMessage.offsetTop;
+                        const messageHeight = lastMessage.offsetHeight;
+                        const paddingBottom = 140; // Account for input container space
+                        
+                        // Calculate optimal scroll position
+                        let scrollPosition;
+                        
+                        // If message is very long (takes up most of the screen)
+                        if (messageHeight > containerHeight * 0.7) {
+                            // Show from the beginning with small margin
+                            scrollPosition = Math.max(0, messageTop - 30);
+                        } else {
+                            // For normal messages, position to show the complete message
+                            // but don't scroll past the natural bottom
+                            const idealPosition = messageTop - 30;
+                            const maxScrollPosition = containerScrollHeight - containerHeight + paddingBottom;
+                            
+                            scrollPosition = Math.min(idealPosition, maxScrollPosition);
+                            scrollPosition = Math.max(0, scrollPosition);
+                        }
+                        
+                        this.chatMessages.scrollTo({
+                            top: scrollPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            }
+
+            setLoading(loading) {
+                this.isLoading = loading;
+                this.sendBtn.disabled = loading;
+                
+                if (loading) {
+                    this.sendText.innerHTML = `
+                        <div class="loading">
+                            <div class="loading-dots">
+                                <div class="loading-dot"></div>
+                                <div class="loading-dot"></div>
+                                <div class="loading-dot"></div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    this.sendText.textContent = 'Enviar';
+                }
+            }
+
+            setQuizLoading(loading) {
+                this.generateQuizBtn.disabled = loading;
+                this.generateQuizBtn.textContent = loading ? 'Generando...' : 'Generar Quiz';
+            }
+
+            setPlanLoading(loading) {
+                this.generatePlanBtn.disabled = loading;
+                this.generatePlanBtn.textContent = loading ? 'Creando...' : 'Crear Plan Personalizado';
+            }
+
+            setAgentsLoading(loading) {
+                this.runAnalysisBtn.disabled = loading;
+                this.runAnalysisBtn.textContent = loading ? 'Analizando...' : 'Ejecutar Análisis';
+            }
+
+            // Vector Temas Management
+            loadVectorTemas() {
+                try {
+                    const stored = localStorage.getItem('vectorTemas');
+                    return stored ? JSON.parse(stored) : [];
+                } catch (error) {
+                    console.error('Error loading vectorTemas:', error);
+                    return [];
+                }
+            }
+
+            saveVectorTemas(temas) {
+                try {
+                    localStorage.setItem('vectorTemas', JSON.stringify(temas));
+                    this.vectorTemas = temas;
+                    console.log('VectorTemas saved:', temas);
+                } catch (error) {
+                    console.error('Error saving vectorTemas:', error);
+                }
+            }
+
+            setEjeActivo(eje) {
+                this.ejeActivo = eje;
+                this.addChatMessage(`📌 Eje activo establecido: ${eje}`, 'assistant');
+            }
+
+            // Enhanced chat message sending with new parameters
+            async sendChatMessage() {
+                const message = this.chatInput.value.trim();
+                if (!message || this.isLoading) return;
+
+                // Check for vector temas input
+                if (this.isVectorTemasInput(message)) {
+                    this.handleVectorTemasInput(message);
+                    return;
+                }
+
+                // Check for eje activation
+                const ejeDetected = this.detectEje(message);
+                if (ejeDetected) {
+                    this.setEjeActivo(ejeDetected);
+                }
+
+                this.addChatMessage(message, 'user');
+                this.chatInput.value = '';
+                this.chatInput.style.height = 'auto';
+
+                this.setLoading(true);
+
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            message, 
+                            studentId: 'estudiante1',
+                            vectorTemas: this.vectorTemas,
+                            ejeActivo: this.ejeActivo,
+                            mode: this.currentStudyMode
+                        }),
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    this.addChatMessage(data.response, 'assistant', data.chunks_used || 0, data.source);
+                    
+                    // Handle refinement suggestions
+                    if (data.suggestions) {
+                        this.handleRefinementSuggestions(data.suggestions);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.addChatMessage(
+                        `❌ Error: ${error.message}. Verifica tu conexión y configuración de API.`, 
+                        'assistant'
+                    );
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            isVectorTemasInput(message) {
+                // Check if message looks like a JSON array or comma-separated list
+                return message.includes('[') && message.includes(']') || 
+                       message.toLowerCase().includes('temas:') ||
+                       message.toLowerCase().includes('vectortemas');
+            }
+
+            handleVectorTemasInput(message) {
+                try {
+                    let temas = [];
+                    
+                    if (message.includes('[') && message.includes(']')) {
+                        // JSON array format
+                        const jsonMatch = message.match(/\[(.*?)\]/);
+                        if (jsonMatch) {
+                            temas = JSON.parse('[' + jsonMatch[1] + ']');
+                        }
+                    } else if (message.toLowerCase().includes('temas:')) {
+                        // "temas: tema1, tema2, tema3" format
+                        const temasMatch = message.match(/temas:\s*(.+)/i);
+                        if (temasMatch) {
+                            temas = temasMatch[1].split(',').map(t => t.trim());
+                        }
+                    }
+                    
+                    if (temas.length > 0) {
+                        this.saveVectorTemas(temas);
+                        this.addChatMessage(`✅ VectorTemas actualizado: ${temas.join(', ')}`, 'assistant');
+                        this.chatInput.value = '';
+                    } else {
+                        this.addChatMessage('❌ Formato de temas no reconocido. Usa: ["tema1","tema2"] o temas: tema1, tema2', 'assistant');
+                    }
+                } catch (error) {
+                    this.addChatMessage('❌ Error procesando temas. Verifica el formato.', 'assistant');
+                }
+            }
+
+            detectEje(message) {
+                const ejes = [
+                    'U1-Res. de Problemas',
+                    'U2-Alg. Computacionales', 
+                    'U3-Est. de Control',
+                    'U4-Arreglos',
+                    'U5-Intro Prog.',
+                    'U6-Intro C++',
+                    'U7-Est. de Control',
+                    'U8-Funciones',
+                    'U9-Arreglos y Structs',
+                    'Parcial1',
+                    'Parcial2',
+                    'Parcial3'
+                ];
+                
+                const messageLower = message.toLowerCase();
+                
+                for (const eje of ejes) {
+                    if (messageLower.includes(eje.toLowerCase()) || 
+                        messageLower.includes(eje.replace(/[^a-zA-Z0-9]/g, '').toLowerCase())) {
+                        return eje;
+                    }
+                }
+                
+                return null;
+            }
+
+            handleRefinementSuggestions(suggestions) {
+                const suggestionsHtml = suggestions.map((s, i) => `${i + 1}. ${s}`).join('\n');
+                
+                this.addChatMessage(
+                    `🎯 Sugerencias de ${this.currentStudyMode === 'theory' ? 'teoría' : 'práctica'}:\n\n${suggestionsHtml}\n\n¿Te parecen bien? Responde "OK" para continuar o "NO" para refinar.`,
+                    'assistant'
+                );
+            }
+        }
+
+        // No inicializar aquí - se hace desde el script de KaTeX
+    </script>
+</body>
+</html>

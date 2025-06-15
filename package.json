@@ -1,0 +1,14 @@
+{
+  "name": "mora-deerflow",
+  "version": "1.0.0",
+  "description": "Chat pedagógico adaptativo con RAG y modelado de estudiante",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

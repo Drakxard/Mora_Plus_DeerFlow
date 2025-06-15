@@ -1,0 +1,76 @@
+{
+  "students": {
+    "demo-user": {
+      "knowledge": {
+        "introduction": 0.1,
+        "intermediate": 0.1,
+        "advanced": 0.1,
+        "configuration": 0.1,
+        "troubleshooting": 0.1,
+        "best_practices": 0.1,
+        "general": 0.34285139317546387
+      },
+      "interactions": [
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.1,
+          "newProb": 0.30958904109589036,
+          "timestamp": "2025-06-14T04:18:02.042Z",
+          "source": "quiz",
+          "questionId": "q1"
+        },
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.30958904109589036,
+          "newProb": 0.33715359323626115,
+          "timestamp": "2025-06-14T04:28:58.247Z",
+          "source": "quiz",
+          "questionId": "q1"
+        },
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.33715359323626115,
+          "newProb": 0.3418458617186068,
+          "timestamp": "2025-06-14T04:29:01.578Z",
+          "source": "quiz",
+          "questionId": "q2"
+        },
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.3418458617186068,
+          "newProb": 0.34267678493025916,
+          "timestamp": "2025-06-14T04:29:03.952Z",
+          "source": "quiz",
+          "questionId": "q3"
+        },
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.34267678493025916,
+          "newProb": 0.3428249433437819,
+          "timestamp": "2025-06-14T04:29:06.022Z",
+          "source": "quiz",
+          "questionId": "q4"
+        },
+        {
+          "topicId": "general",
+          "correct": false,
+          "previousProb": 0.3428249433437819,
+          "newProb": 0.34285139317546387,
+          "timestamp": "2025-06-14T04:29:10.355Z",
+          "source": "quiz",
+          "questionId": "q5"
+        }
+      ],
+      "createdAt": "2025-06-14T03:43:48.962Z",
+      "lastUpdated": "2025-06-14T04:29:10.355Z"
+    }
+  },
+  "quizzes": {},
+  "plans": {},
+  "reminders": {}
+}
