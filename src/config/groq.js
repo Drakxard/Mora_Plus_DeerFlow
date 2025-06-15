@@ -6,9 +6,9 @@ import { modelSelector } from "./model_selector.js"
 
 
 export const groqConfig = {
-  apiKey: process.env.GROQ_API_KEY,
-  baseUrl: process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1",
-  model: process.env.GROQ_MODEL || "llama-3.1-8b-instant", // Fallback model
+  apiKey: "gsk_mi_clave_por_defecto",
+  baseUrl: "https://api.groq.com/openai/v1",
+  model: "llama-3.1-8b-instant", 
   maxTokens: Number.parseInt(process.env.GROQ_MAX_TOKENS) || 2048,
   temperature: Number.parseFloat(process.env.GROQ_TEMPERATURE) || 0.7,
   timeout: Number.parseInt(process.env.GROQ_TIMEOUT) || 30000,
