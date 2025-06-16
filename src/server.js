@@ -364,31 +364,40 @@ ${bestChunk.text}
       }
     }
 
-    // Step 4: Generate adaptive AI response
-    const adaptivePrompt = `Eres un tutor de matemáticas especializado. Responde la pregunta del estudiante basándote ÚNICAMENTE en el contexto proporcionado.
+    // Step 4: Generate adaptive AI response LUEGO CARGAR PROMT SYSTEM -> TUTOR EN PARTICULAR
 
-NIVEL DEL ESTUDIANTE: ${adaptiveLevel}
-CONTEXTO RELEVANTE:
-${context}
+      const adaptivePrompt = `Eres un tutor experto en Fundamentos de Programación. TU MISIÓN es generar enunciados de ejercicios para Segundo Parcial o Final con un estilo profesional, adecuados para una clase de 3 horas, escritos pensando en papel y lápiz, que exijan análisis profundo y contengan “trampas” sutiles para desafiar al estudiante.
+Index a usar como profesor -> Leer, Dato N, Mientras sea, Repetir, Hasta que, Si, Sino, Insertar.
+1. CUATRO EJES TEMÁTICOS  
+   - Selecciona 4 ejes relevantes del contexto provisto.
 
-PREGUNTA DEL ESTUDIANTE: ${question}
+2. ENUNCIADOS DE EJERCICIOS  
+   - Para cada eje, crea un ejercicio numerado como EjN (30 pts):  
+ 
+     Ej1 (30 pts)
+   - El enunciado debe:  
+     - Pensarse como un reto de **papel y lápiz** (sin código a ejecutar).  
+     - Requerir **análisis detallado** y comprensión de varios conceptos combinados.  
+     - Incluir al menos una “trampa” sutil que, sin reflexión, sea fácil pasar por alto.
 
-INSTRUCCIONES ADAPTATIVAS:
-1. Responde SOLO con información del contexto proporcionado
-2. Adapta el lenguaje al nivel ${adaptiveLevel}:
-   - Beginner: Usa explicaciones simples, evita jerga técnica
-   - Intermediate: Equilibra conceptos y aplicaciones
-   - Advanced: Puedes usar terminología técnica y conceptos complejos
-3. Si la pregunta es sobre un concepto específico, explícalo claramente para el nivel ${adaptiveLevel}
-4. Usa ejemplos del contexto cuando sea posible
-5. Si el contexto no es suficiente, dilo honestamente
-6. Mantén un tono educativo y amigable
-7. No inventes información que no esté en el contexto
+3. REGLAS  
+   - Basa los ejes en ${context} pero genera enunciados **totalmente nuevos** y de **alta dificultad**.  
+   - Ajusta la complejidad al nivel ${adaptiveLevel}.  
+   - Responde en español, con tono **educativo**, **claro** y **conciso**.  
+   - No agregues secciones ni explicaciones adicionales fuera del formato.
 
-RESPUESTA EDUCATIVA ADAPTATIVA:`
+–––
 
-    console.log("🤖 Calling GROQ API with adaptive prompt...")
-    const aiResponse = await callGroqAPI(adaptivePrompt)
+NIVEL DEL ESTUDIANTE: ${adaptiveLevel}  
+CONTEXTO RELEVANTE:  
+${context}  
+
+PREGUNTA DEL ESTUDIANTE: "${question}"  
+
+RESPUESTA FORMATEADA:`;
+
+      console.log("🤖 Calling GROQ API with adaptive prompt...");
+      const aiResponse = await callGroqAPI(adaptivePrompt);
 
     const totalTime = Date.now() - startTime
     logProgress("ADAPTIVE_RAG", 6, 6, `Completed in ${totalTime}ms`)

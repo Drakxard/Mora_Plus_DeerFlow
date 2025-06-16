@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<style type="text/css">
+    
         :root {
             --primary: #8B5CF6;
             --primary-dark: #7C3AED;
@@ -685,7 +688,8 @@
                 padding: 20px;
             }
         }
-    </style>
+    
+</style>
 </head>
 <body>
     <div class="container">
@@ -831,6 +835,12 @@
     </div>
 
     <script>
+        const md = window.markdownit({
+          html:       false,
+          linkify:    true,
+          typographer: true
+        });
+        
         class AdaptiveApp {
             constructor() {
                 this.currentMode = 'chat';
@@ -1205,7 +1215,7 @@
                 
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
-                contentDiv.innerHTML = content;
+                contentDiv.innerHTML = md.render(content);
                 
                 messageDiv.appendChild(contentDiv);
 

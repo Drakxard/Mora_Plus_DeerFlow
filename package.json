@@ -6,7 +6,17 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "node --watch src/server.js",
+    "chunk-and-embed": "python scripts/chunk_and_embed.py",
+    "embed-single": "python scripts/embed_single.py",
+    "benchmark": "node scripts/benchmark.js",
+    "reset-all-data": "node scripts/reset-all-data.js",
+    "reset-plan-data": "node scripts/reset-plan-data.js",
+    "reset-quiz-data": "node scripts/reset-quiz-data.js",
+    "reset-student-data": "node scripts/reset-student-data.js",
+    "setup-groq": "node scripts/setup-groq.js",
+    "validate-config": "node scripts/validate-config.js",
+    "validate-config-simple": "node scripts/validate-config-simple.js"
   },
   "engines": {
     "node": ">=18.0.0"
