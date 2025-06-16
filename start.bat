@@ -1,5 +1,5 @@
 @echo off 
-set GROQ_API_KEY=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 
-set TAVILY_API_KEY=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 
+set GROQ_API_KEY=api_groq 
+set TAVILY_API_KEY=tvly-devxx 
 set DEBUG=True 
 npm start 
