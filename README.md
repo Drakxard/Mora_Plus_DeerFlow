@@ -1,4 +1,4 @@
-# Mora + DeerFlow – Sistema Completo de Aprendizaje Adaptativo con Agentes IA
+# Mora + DeerFlow – Sistema Completo de Aprendizaje Adaptativo con Agentes IA (README DESACTUALIZADO)
 
 Sistema de búsqueda semántica con chat RAG, modelado de estudiante usando BKT (Bayesian Knowledge Tracing), quizzes adaptativos, planificación personalizada y **agentes DeerFlow especializados** para flujos académicos avanzados.
 
